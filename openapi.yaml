@@ -1,0 +1,566 @@
+openapi: 3.1.0
+info:
+  title: Draftout Community API
+  version: 0.1.0
+  description: |
+    Community-maintained OpenAPI description for the public Draftout stats
+    endpoints observed at draftoutmc.com.
+
+    This is not an official Draftout API specification. It was inferred from
+    live responses on 2026-05-26 and may be incomplete.
+servers:
+  - url: https://draftoutmc.com
+    description: Draftout production server
+tags:
+  - name: Stats
+    description: Player stats, match details, and Elo history.
+  - name: Ranks
+    description: Elo rank bands.
+paths:
+  /api/ranks:
+    get:
+      tags:
+        - Ranks
+      summary: Get Elo rank bands
+      description: |
+        Returns the configured Draftout Elo rank bands in ascending Elo order.
+        The lowest and highest bands are open-ended and use `null` for the
+        missing bound.
+      operationId: getRanks
+      responses:
+        "200":
+          description: Rank bands.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rank"
+              examples:
+                ranks:
+                  summary: Rank bands
+                  value:
+                    - name: Coal
+                      min: null
+                      max: 499
+                      color: "#424646"
+                    - name: Guardian I
+                      min: 1700
+                      max: 1799
+                      color: "#45686e"
+                    - name: Warden
+                      min: 2000
+                      max: null
+                      color: "#2b4450"
+  /api/stats/{username}:
+    get:
+      tags:
+        - Stats
+      summary: Get player stats and recent matches
+      description: |
+        Returns player metadata, aggregate record information, and a paginated
+        list of matches for the selected filter. If the player is not found,
+        the endpoint still returns HTTP 200 with `player: null` and empty stats.
+      operationId: getPlayerStats
+      parameters:
+        - $ref: "#/components/parameters/Username"
+        - name: page
+          in: query
+          description: One-based page number. Defaults to `1`.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: filter
+          in: query
+          description: Match queue filter. Defaults to `competitive`.
+          required: false
+          schema:
+            $ref: "#/components/schemas/MatchFilter"
+            default: competitive
+      responses:
+        "200":
+          description: Player stats page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerStatsResponse"
+              examples:
+                competitive:
+                  summary: Competitive stats
+                  value:
+                    player:
+                      uuid: 9a8e24df-4c85-49d6-96a6-951da84fa5c4
+                      username: Feinberg
+                      elo: 1705
+                      ranked: true
+                      rank: 1
+                      rankName: Guardian I
+                      rankColor: "#45686e"
+                    record:
+                      matches: 43
+                      completedMatches: 39
+                      wins: 40
+                      losses: 2
+                      draws: 1
+                      winRate: 0.9523809523809523
+                      averageFinishTime: 1487023.7837837837
+                      averageGoals: 6.230769230769231
+                    aggregate:
+                      peakElo: 1705
+                      bestStreak: 18
+                      fastestWinMs: 693452
+                      forfeitCount: 0
+                    matches:
+                      - id: 20010
+                        matchType: competitive
+                        outcome: finished
+                        completedAt: 1779754939814
+                        durationMs: 2316432
+                        participants:
+                          - uuid: 9a8e24df-4c85-49d6-96a6-951da84fa5c4
+                            username: Feinberg
+                            won: true
+                            score: 13
+                            eloBefore: 1692
+                            eloChange: 13
+                            eloAfter: 1705
+                    page: 1
+                    totalPages: 3
+                    filter: competitive
+  /api/stats/{username}/{matchId}:
+    get:
+      tags:
+        - Stats
+      summary: Get a player's match detail
+      description: |
+        Returns player metadata and detailed match data for the requested match.
+        If the match is not found for the player, the endpoint returns HTTP 200
+        with `match: null`.
+      operationId: getPlayerMatch
+      parameters:
+        - $ref: "#/components/parameters/Username"
+        - name: matchId
+          in: path
+          required: true
+          description: Numeric Draftout match ID.
+          schema:
+            type: integer
+            example: 20010
+      responses:
+        "200":
+          description: "Match detail or `match: null`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchDetailResponse"
+  /api/stats/{username}/elo-series:
+    get:
+      tags:
+        - Stats
+      summary: Get a player's Elo history
+      description: |
+        Returns the player's starting Elo and one point per competitive match
+        used to build an Elo chart.
+      operationId: getPlayerEloSeries
+      parameters:
+        - $ref: "#/components/parameters/Username"
+      responses:
+        "200":
+          description: Elo series.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EloSeriesResponse"
+components:
+  parameters:
+    Username:
+      name: username
+      in: path
+      required: true
+      description: Minecraft username.
+      schema:
+        type: string
+        example: Feinberg
+  schemas:
+    MatchFilter:
+      type: string
+      enum:
+        - competitive
+        - quick-play
+    Rank:
+      type: object
+      required:
+        - name
+        - min
+        - max
+        - color
+      properties:
+        name:
+          type: string
+          example: Guardian I
+        min:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          description: Minimum Elo for the band. `null` means no lower bound.
+        max:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          description: Maximum Elo for the band. `null` means no upper bound.
+        color:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          example: "#45686e"
+    PlayerStatsResponse:
+      type: object
+      required:
+        - player
+        - record
+        - aggregate
+        - matches
+        - page
+        - totalPages
+        - filter
+      properties:
+        player:
+          anyOf:
+            - $ref: "#/components/schemas/Player"
+            - type: "null"
+        record:
+          $ref: "#/components/schemas/Record"
+        aggregate:
+          $ref: "#/components/schemas/Aggregate"
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/MatchSummary"
+        page:
+          type: integer
+          minimum: 1
+        totalPages:
+          type: integer
+          minimum: 1
+        filter:
+          $ref: "#/components/schemas/MatchFilter"
+    MatchDetailResponse:
+      type: object
+      required:
+        - player
+        - match
+      properties:
+        player:
+          anyOf:
+            - $ref: "#/components/schemas/Player"
+            - type: "null"
+        match:
+          anyOf:
+            - $ref: "#/components/schemas/MatchDetail"
+            - type: "null"
+    EloSeriesResponse:
+      type: object
+      required:
+        - startElo
+        - points
+      properties:
+        startElo:
+          type: integer
+          example: 1259
+        points:
+          type: array
+          items:
+            $ref: "#/components/schemas/EloPoint"
+    Player:
+      type: object
+      required:
+        - uuid
+        - username
+        - elo
+        - ranked
+        - rank
+        - rankName
+        - rankColor
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        username:
+          type: string
+        elo:
+          type: integer
+        ranked:
+          type: boolean
+        rank:
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          description: Leaderboard rank. Observed as `null` for quick-play responses.
+        rankName:
+          type: string
+          example: Guardian I
+        rankColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          example: "#45686e"
+    Record:
+      type: object
+      required:
+        - matches
+        - completedMatches
+        - wins
+        - losses
+        - draws
+        - winRate
+        - averageFinishTime
+        - averageGoals
+      properties:
+        matches:
+          type: integer
+          minimum: 0
+        completedMatches:
+          type: integer
+          minimum: 0
+        wins:
+          type: integer
+          minimum: 0
+        losses:
+          type: integer
+          minimum: 0
+        draws:
+          type: integer
+          minimum: 0
+        winRate:
+          type: number
+          minimum: 0
+        averageFinishTime:
+          type:
+            - number
+            - "null"
+          description: Average finish time in milliseconds.
+        averageGoals:
+          type:
+            - number
+            - "null"
+    Aggregate:
+      type: object
+      required:
+        - peakElo
+        - bestStreak
+        - fastestWinMs
+        - forfeitCount
+      properties:
+        peakElo:
+          type:
+            - integer
+            - "null"
+        bestStreak:
+          type: integer
+          minimum: 0
+        fastestWinMs:
+          type:
+            - integer
+            - "null"
+          description: Fastest win duration in milliseconds.
+        forfeitCount:
+          type: integer
+          minimum: 0
+    MatchSummary:
+      type: object
+      required:
+        - id
+        - matchType
+        - outcome
+        - completedAt
+        - durationMs
+        - participants
+      properties:
+        id:
+          type: integer
+        matchType:
+          $ref: "#/components/schemas/MatchType"
+        outcome:
+          $ref: "#/components/schemas/MatchOutcome"
+        completedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds.
+        durationMs:
+          type: integer
+          description: Match duration in milliseconds.
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/Participant"
+    MatchDetail:
+      allOf:
+        - $ref: "#/components/schemas/MatchSummary"
+        - type: object
+          required:
+            - seed
+            - goals
+            - draft
+          properties:
+            seed:
+              type: string
+              description: Minecraft world seed represented as a string.
+            goals:
+              type: array
+              items:
+                $ref: "#/components/schemas/Goal"
+            draft:
+              $ref: "#/components/schemas/Draft"
+    Participant:
+      type: object
+      required:
+        - uuid
+        - username
+        - won
+        - score
+        - eloBefore
+        - eloChange
+        - eloAfter
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        username:
+          type: string
+        won:
+          type: boolean
+        score:
+          type: integer
+          minimum: 0
+        eloBefore:
+          type: integer
+        eloChange:
+          type: integer
+        eloAfter:
+          type: integer
+    Goal:
+      type: object
+      required:
+        - index
+        - id
+        - data
+        - completed
+        - completedByUuid
+        - completedAtMs
+      properties:
+        index:
+          type: integer
+          minimum: 0
+        id:
+          type: string
+          example: OBTAIN_64_COLORED_CONCRETE
+        data:
+          type:
+            - string
+            - "null"
+          description: Goal-specific data, such as a color name.
+        completed:
+          type: boolean
+        completedByUuid:
+          type:
+            - string
+            - "null"
+          format: uuid
+        completedAtMs:
+          type:
+            - integer
+            - "null"
+          description: Milliseconds after match start when the goal was completed.
+    Draft:
+      type: object
+      required:
+        - pickedFirstUuid
+        - pool
+      properties:
+        pickedFirstUuid:
+          type:
+            - string
+            - "null"
+          format: uuid
+        pool:
+          type: array
+          items:
+            $ref: "#/components/schemas/DraftPoolItem"
+    DraftPoolItem:
+      type: object
+      required:
+        - id
+        - data
+        - picked
+        - timedOut
+      properties:
+        id:
+          type: string
+        data:
+          type:
+            - string
+            - "null"
+        picked:
+          type: boolean
+        timedOut:
+          type: boolean
+    EloPoint:
+      type: object
+      required:
+        - matchId
+        - completedAt
+        - eloBefore
+        - eloAfter
+        - eloChange
+        - outcome
+        - won
+        - opponentUuid
+        - opponentName
+        - playerScore
+        - opponentScore
+        - durationMs
+      properties:
+        matchId:
+          type: integer
+        completedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds.
+        eloBefore:
+          type: integer
+        eloAfter:
+          type: integer
+        eloChange:
+          type: integer
+        outcome:
+          $ref: "#/components/schemas/MatchOutcome"
+        won:
+          type: boolean
+        opponentUuid:
+          type: string
+          format: uuid
+        opponentName:
+          type: string
+        playerScore:
+          type: integer
+          minimum: 0
+        opponentScore:
+          type: integer
+          minimum: 0
+        durationMs:
+          type: integer
+    MatchType:
+      type: string
+      enum:
+        - competitive
+        - quick-play
+    MatchOutcome:
+      type: string
+      description: Match outcome values observed in live responses.
+      enum:
+        - finished
+        - forfeited
+        - draw_by_vote

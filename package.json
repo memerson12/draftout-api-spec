@@ -1,0 +1,22 @@
+{
+  "name": "draftout-api-spec",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Community-maintained OpenAPI and Markdown docs for the Draftout stats API.",
+  "type": "module",
+  "scripts": {
+    "docs:generate": "widdershins openapi.yaml -o docs/api.md --omitHeader --search false --language_tabs shell:Shell",
+    "docs:html": "redocly build-docs openapi.yaml --output docs/api.html --title 'Draftout Community API'",
+    "docs:serve": "pnpm docs:html && serve docs --listen 8088",
+    "spec:lint": "redocly lint openapi.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.31.4",
+    "serve": "^14.2.6",
+    "widdershins": "^4.0.1"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=10"
+  }
+}

@@ -7,7 +7,7 @@ info:
     endpoints observed at draftoutmc.com.
 
     This is not an official Draftout API specification. It was inferred from
-    live responses on 2026-05-26 and may be incomplete.
+    live responses on 2026-06-07 and may be incomplete.
 servers:
   - url: https://draftoutmc.com
     description: Draftout production server
@@ -572,7 +572,7 @@ components:
         - draw_by_vote
     GameMode:
       type: string
-      description: Different types of gamemodes, always draftout for competitive/quick-play 
+      description: Different types of gamemodes, always draftout for competitive/quick-play
       enum:
         - draftout
         - lockout

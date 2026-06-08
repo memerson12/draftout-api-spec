@@ -1,0 +1,62 @@
+name: Check generated docs
+
+on:
+  pull_request:
+    paths:
+      - openapi.yaml
+      - redocly.yaml
+      - package.json
+      - pnpm-lock.yaml
+      - docs/**
+      - .github/workflows/docs-check.yml
+  push:
+    branches:
+      - main
+    paths:
+      - openapi.yaml
+      - redocly.yaml
+      - package.json
+      - pnpm-lock.yaml
+      - docs/**
+      - .github/workflows/docs-check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs-current:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint OpenAPI spec
+        run: pnpm spec:lint
+
+      - name: Regenerate docs
+        run: |
+          pnpm docs:generate
+          pnpm docs:html
+
+      - name: Confirm generated docs are committed
+        run: |
+          CHANGES="$(git status --porcelain -- docs/api.md docs/api.html docs/index.html)"
+          if [ -n "$CHANGES" ]; then
+            echo "$CHANGES"
+            echo "::error::Generated docs are out of date. Run pnpm docs:generate && pnpm docs:html and commit the docs/ changes."
+            exit 1
+          fi

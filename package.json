@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "docs:generate": "widdershins openapi.yaml -o docs/api.md --omitHeader --search false --language_tabs shell:Shell",
-    "docs:html": "redocly build-docs openapi.yaml --output docs/api.html --title 'Draftout Community API'",
+    "docs:html": "redocly build-docs openapi.yaml --output docs/index.html --title 'Draftout Community API' && cp docs/index.html docs/api.html",
     "docs:serve": "pnpm docs:html && serve docs --listen 8088",
     "spec:lint": "redocly lint openapi.yaml"
   },

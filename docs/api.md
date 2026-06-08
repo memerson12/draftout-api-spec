@@ -8,7 +8,7 @@ Community-maintained OpenAPI description for the public Draftout stats
 endpoints observed at draftoutmc.com.
 
 This is not an official Draftout API specification. It was inferred from
-live responses on 2026-05-26 and may be incomplete.
+live responses on 2026-06-07 and may be incomplete.
 
 Base URLs:
 

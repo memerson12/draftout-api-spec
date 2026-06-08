@@ -115,6 +115,7 @@ paths:
                     matches:
                       - id: 20010
                         matchType: competitive
+                        gameMode: draftout
                         outcome: finished
                         completedAt: 1779754939814
                         durationMs: 2316432
@@ -189,6 +190,7 @@ components:
       enum:
         - competitive
         - quick-play
+        - lobby
     Rank:
       type: object
       required:
@@ -374,6 +376,7 @@ components:
       required:
         - id
         - matchType
+        - gameMode
         - outcome
         - completedAt
         - durationMs
@@ -383,6 +386,8 @@ components:
           type: integer
         matchType:
           $ref: "#/components/schemas/MatchType"
+        gameMode:
+          $ref: "#/components/schemas/GameMode"
         outcome:
           $ref: "#/components/schemas/MatchOutcome"
         completedAt:
@@ -557,6 +562,7 @@ components:
       enum:
         - competitive
         - quick-play
+        - lobby
     MatchOutcome:
       type: string
       description: Match outcome values observed in live responses.
@@ -564,3 +570,10 @@ components:
         - finished
         - forfeited
         - draw_by_vote
+    GameMode:
+      type: string
+      description: Different types of gamemodes, always draftout for competitive/quick-play 
+      enum:
+        - draftout
+        - lockout
+        - blackout

@@ -53,6 +53,7 @@ the endpoint still returns HTTP 200 with `player: null` and empty stats.
 |---|---|
 |filter|competitive|
 |filter|quick-play|
+|filter|lobby|
 
 > Example responses
 
@@ -89,6 +90,7 @@ the endpoint still returns HTTP 200 with `player: null` and empty stats.
     {
       "id": 20010,
       "matchType": "competitive",
+      "gameMode": "draftout",
       "outcome": "finished",
       "completedAt": 1779754939814,
       "durationMs": 2316432,
@@ -167,6 +169,7 @@ with `match: null`.
   "match": {
     "id": 0,
     "matchType": "competitive",
+    "gameMode": "draftout",
     "outcome": "finished",
     "completedAt": 0,
     "durationMs": 0,
@@ -379,6 +382,7 @@ This operation does not require authentication
 |---|---|
 |*anonymous*|competitive|
 |*anonymous*|quick-play|
+|*anonymous*|lobby|
 
 <h2 id="tocS_Rank">Rank</h2>
 <!-- backwards compatibility -->
@@ -444,6 +448,7 @@ This operation does not require authentication
     {
       "id": 0,
       "matchType": "competitive",
+      "gameMode": "draftout",
       "outcome": "finished",
       "completedAt": 0,
       "durationMs": 0,
@@ -517,6 +522,7 @@ continued
   "match": {
     "id": 0,
     "matchType": "competitive",
+    "gameMode": "draftout",
     "outcome": "finished",
     "completedAt": 0,
     "durationMs": 0,
@@ -734,6 +740,7 @@ or
 {
   "id": 0,
   "matchType": "competitive",
+  "gameMode": "draftout",
   "outcome": "finished",
   "completedAt": 0,
   "durationMs": 0,
@@ -758,6 +765,7 @@ or
 |---|---|---|---|---|
 |id|integer|true|none|none|
 |matchType|[MatchType](#schemamatchtype)|true|none|none|
+|gameMode|[GameMode](#schemagamemode)|true|none|Different types of gamemodes, always draftout for competitive/quick-play|
 |outcome|[MatchOutcome](#schemamatchoutcome)|true|none|Match outcome values observed in live responses.|
 |completedAt|integer(int64)|true|none|Unix timestamp in milliseconds.|
 |durationMs|integer|true|none|Match duration in milliseconds.|
@@ -774,6 +782,7 @@ or
 {
   "id": 0,
   "matchType": "competitive",
+  "gameMode": "draftout",
   "outcome": "finished",
   "completedAt": 0,
   "durationMs": 0,
@@ -1014,6 +1023,7 @@ and
 |---|---|
 |*anonymous*|competitive|
 |*anonymous*|quick-play|
+|*anonymous*|lobby|
 
 <h2 id="tocS_MatchOutcome">MatchOutcome</h2>
 <!-- backwards compatibility -->
@@ -1042,4 +1052,32 @@ Match outcome values observed in live responses.
 |*anonymous*|finished|
 |*anonymous*|forfeited|
 |*anonymous*|draw_by_vote|
+
+<h2 id="tocS_GameMode">GameMode</h2>
+<!-- backwards compatibility -->
+<a id="schemagamemode"></a>
+<a id="schema_GameMode"></a>
+<a id="tocSgamemode"></a>
+<a id="tocsgamemode"></a>
+
+```json
+"draftout"
+
+```
+
+Different types of gamemodes, always draftout for competitive/quick-play
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|string|false|none|Different types of gamemodes, always draftout for competitive/quick-play|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|*anonymous*|draftout|
+|*anonymous*|lockout|
+|*anonymous*|blackout|
 

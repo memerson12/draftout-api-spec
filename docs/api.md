@@ -1022,7 +1022,7 @@ and
 |Property|Value|
 |---|---|
 |*anonymous*|competitive|
-|*anonymous*|quick-play|
+|*anonymous*|quick_play|
 |*anonymous*|lobby|
 
 <h2 id="tocS_MatchOutcome">MatchOutcome</h2>

@@ -561,7 +561,7 @@ components:
       type: string
       enum:
         - competitive
-        - quick-play
+        - quick_play
         - lobby
     MatchOutcome:
       type: string

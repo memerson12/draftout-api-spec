@@ -43,12 +43,21 @@ and scoped to a rating era.
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|metric|query|[LeaderboardMetric](#schemaleaderboardmetric)|false|Statistic used to order the results. Defaults to `elo`.|
+|metric|query|[LeaderboardMetric](#schemaleaderboardmetric)|false|Statistic used to order the results:|
 |q|query|string|false|Case-insensitive username search query.|
 |limit|query|integer|false|Maximum number of rows to return. Defaults to `100`.|
 |era|query|integer|false|Positive rating-era ID. When omitted, the latest era is used. Available|
 
 #### Detailed descriptions
+
+**metric**: Statistic used to order the results:
+
+- `elo`: current rating.
+- `winrate`: wins divided by wins plus losses; draws are excluded.
+- `diff`: average goal differential across completed matches,
+  calculated as player goals minus opponent goals.
+
+Defaults to `elo`.
 
 **era**: Positive rating-era ID. When omitted, the latest era is used. Available
 eras are returned in leaderboard and player-stat responses.
@@ -522,11 +531,17 @@ This operation does not require authentication
 
 ```
 
+Match queue included in a player's record and match list:
+
+- `competitive`: ranked competitive matches.
+- `quick-play`: unranked quick-play matches.
+- `lobby`: custom lobby matches.
+
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|none|
+|*anonymous*|string|false|none|Match queue included in a player's record and match list:<br><br>- `competitive`: ranked competitive matches.<br>- `quick-play`: unranked quick-play matches.<br>- `lobby`: custom lobby matches.|
 
 #### Enumerated Values
 
@@ -614,7 +629,7 @@ This operation does not require authentication
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |rows|[[LeaderboardRow](#schemaleaderboardrow)]|true|none|none|
-|metric|[LeaderboardMetric](#schemaleaderboardmetric)|true|none|none|
+|metric|[LeaderboardMetric](#schemaleaderboardmetric)|true|none|Statistic used to order leaderboard rows:<br><br>- `elo`: current rating (`elo`).<br>- `winrate`: `wins / (wins + losses)`; draws are excluded.<br>- `diff`: average goal differential across completed matches, exposed<br>  as `averageGoals` and calculated as player goals minus opponent goals.|
 |query|string|true|none|Normalized username query, or an empty string when omitted.|
 |limit|integer|true|none|none|
 |eraId|integer|true|none|none|
@@ -686,11 +701,18 @@ This operation does not require authentication
 
 ```
 
+Statistic used to order leaderboard rows:
+
+- `elo`: current rating (`elo`).
+- `winrate`: `wins / (wins + losses)`; draws are excluded.
+- `diff`: average goal differential across completed matches, exposed
+  as `averageGoals` and calculated as player goals minus opponent goals.
+
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|none|
+|*anonymous*|string|false|none|Statistic used to order leaderboard rows:<br><br>- `elo`: current rating (`elo`).<br>- `winrate`: `wins / (wins + losses)`; draws are excluded.<br>- `diff`: average goal differential across completed matches, exposed<br>  as `averageGoals` and calculated as player goals minus opponent goals.|
 
 #### Enumerated Values
 
@@ -724,7 +746,7 @@ This operation does not require authentication
 |id|integer|true|none|none|
 |firstMatchId|integer|true|none|First match ID included in the era.|
 |season|integer,null|true|none|none|
-|system|[RatingSystem](#schemaratingsystem)|true|none|none|
+|system|[RatingSystem](#schemaratingsystem)|true|none|Rating algorithm used by an era:<br><br>- `elo`: the legacy Elo rating system; rating deviation is `null`.<br>- `glicko2`: Glicko-2 ratings with rating deviation in `rd`.|
 
 <h2 id="tocS_RatingSystem">RatingSystem</h2>
 <!-- backwards compatibility -->
@@ -738,11 +760,16 @@ This operation does not require authentication
 
 ```
 
+Rating algorithm used by an era:
+
+- `elo`: the legacy Elo rating system; rating deviation is `null`.
+- `glicko2`: Glicko-2 ratings with rating deviation in `rd`.
+
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|none|
+|*anonymous*|string|false|none|Rating algorithm used by an era:<br><br>- `elo`: the legacy Elo rating system; rating deviation is `null`.<br>- `glicko2`: Glicko-2 ratings with rating deviation in `rd`.|
 
 #### Enumerated Values
 
@@ -855,7 +882,7 @@ continued
 |matches|[[MatchSummary](#schemamatchsummary)]|true|none|none|
 |page|integer|true|none|none|
 |totalPages|integer|true|none|none|
-|filter|[MatchFilter](#schemamatchfilter)|true|none|none|
+|filter|[MatchFilter](#schemamatchfilter)|true|none|Match queue included in a player's record and match list:<br><br>- `competitive`: ranked competitive matches.<br>- `quick-play`: unranked quick-play matches.<br>- `lobby`: custom lobby matches.|
 |eraId|integer|true|none|none|
 |eras|[[Era](#schemaera)]|true|none|none|
 
@@ -1139,12 +1166,12 @@ or
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|integer|true|none|none|
-|matchType|[MatchType](#schemamatchtype)|true|none|none|
-|gameMode|[GameMode](#schemagamemode)|true|none|Different types of gamemodes, always draftout for competitive/quick-play|
+|matchType|[MatchType](#schemamatchtype)|true|none|Queue in which the match was played:<br><br>- `competitive`: ranked competitive queue.<br>- `quick_play`: unranked quick-play queue.<br>- `lobby`: custom lobby.|
+|gameMode|[GameMode](#schemagamemode)|true|none|Board rules used by the match:<br><br>- `draftout`: players draft the goals on the shared board.<br>- `lockout`: players race on a randomly generated shared board.<br>- `blackout`: players cooperate on one shared board.<br><br>Competitive and quick-play matches use `draftout`; lobby matches may<br>use any of the three modes.|
 |worldSeedMode|string|true|none|World-seed selection mode. Observed as `random`.|
 |boardMode|string|true|none|Board selection mode. Observed as `random`.|
 |usedCommands|boolean|true|none|Whether commands were used during the match.|
-|outcome|[MatchOutcome](#schemamatchoutcome)|true|none|Match outcome values observed in live responses.|
+|outcome|[MatchOutcome](#schemamatchoutcome)|true|none|Match result:<br><br>- `finished`: completed normally.<br>- `forfeited`: ended by a forfeit.<br>- `draw_by_vote`: players voted to end the match as a draw.<br>- `draw`: recorded as a draw.<br>- `cancelled`: cancelled without a result.|
 |completedAt|integer(int64)|true|none|Unix timestamp in milliseconds.|
 |durationMs|integer|true|none|Match duration in milliseconds.|
 |participants|[[Participant](#schemaparticipant)]|true|none|none|
@@ -1379,7 +1406,7 @@ and
 |eloBefore|integer|true|none|none|
 |eloAfter|integer|true|none|none|
 |eloChange|integer|true|none|none|
-|outcome|[MatchOutcome](#schemamatchoutcome)|true|none|Match outcome values observed in live responses.|
+|outcome|[MatchOutcome](#schemamatchoutcome)|true|none|Match result:<br><br>- `finished`: completed normally.<br>- `forfeited`: ended by a forfeit.<br>- `draw_by_vote`: players voted to end the match as a draw.<br>- `draw`: recorded as a draw.<br>- `cancelled`: cancelled without a result.|
 |won|boolean|true|none|none|
 |opponentUuid|string(uuid)|true|none|none|
 |opponentName|string|true|none|none|
@@ -1399,11 +1426,17 @@ and
 
 ```
 
+Queue in which the match was played:
+
+- `competitive`: ranked competitive queue.
+- `quick_play`: unranked quick-play queue.
+- `lobby`: custom lobby.
+
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|none|
+|*anonymous*|string|false|none|Queue in which the match was played:<br><br>- `competitive`: ranked competitive queue.<br>- `quick_play`: unranked quick-play queue.<br>- `lobby`: custom lobby.|
 
 #### Enumerated Values
 
@@ -1425,13 +1458,19 @@ and
 
 ```
 
-Match outcome values observed in live responses.
+Match result:
+
+- `finished`: completed normally.
+- `forfeited`: ended by a forfeit.
+- `draw_by_vote`: players voted to end the match as a draw.
+- `draw`: recorded as a draw.
+- `cancelled`: cancelled without a result.
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|Match outcome values observed in live responses.|
+|*anonymous*|string|false|none|Match result:<br><br>- `finished`: completed normally.<br>- `forfeited`: ended by a forfeit.<br>- `draw_by_vote`: players voted to end the match as a draw.<br>- `draw`: recorded as a draw.<br>- `cancelled`: cancelled without a result.|
 
 #### Enumerated Values
 
@@ -1455,13 +1494,20 @@ Match outcome values observed in live responses.
 
 ```
 
-Different types of gamemodes, always draftout for competitive/quick-play
+Board rules used by the match:
+
+- `draftout`: players draft the goals on the shared board.
+- `lockout`: players race on a randomly generated shared board.
+- `blackout`: players cooperate on one shared board.
+
+Competitive and quick-play matches use `draftout`; lobby matches may
+use any of the three modes.
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|Different types of gamemodes, always draftout for competitive/quick-play|
+|*anonymous*|string|false|none|Board rules used by the match:<br><br>- `draftout`: players draft the goals on the shared board.<br>- `lockout`: players race on a randomly generated shared board.<br>- `blackout`: players cooperate on one shared board.<br><br>Competitive and quick-play matches use `draftout`; lobby matches may<br>use any of the three modes.|
 
 #### Enumerated Values
 

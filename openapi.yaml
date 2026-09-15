@@ -30,7 +30,15 @@ paths:
       parameters:
         - name: metric
           in: query
-          description: Statistic used to order the results. Defaults to `elo`.
+          description: |
+            Statistic used to order the results:
+
+            - `elo`: current rating.
+            - `winrate`: wins divided by wins plus losses; draws are excluded.
+            - `diff`: average goal differential across completed matches,
+              calculated as player goals minus opponent goals.
+
+            Defaults to `elo`.
           required: false
           schema:
             $ref: "#/components/schemas/LeaderboardMetric"
@@ -299,6 +307,12 @@ components:
   schemas:
     MatchFilter:
       type: string
+      description: |
+        Match queue included in a player's record and match list:
+
+        - `competitive`: ranked competitive matches.
+        - `quick-play`: unranked quick-play matches.
+        - `lobby`: custom lobby matches.
       enum:
         - competitive
         - quick-play
@@ -441,6 +455,13 @@ components:
           description: Position in the full metric leaderboard; may be `null` for a searched subset.
     LeaderboardMetric:
       type: string
+      description: |
+        Statistic used to order leaderboard rows:
+
+        - `elo`: current rating (`elo`).
+        - `winrate`: `wins / (wins + losses)`; draws are excluded.
+        - `diff`: average goal differential across completed matches, exposed
+          as `averageGoals` and calculated as player goals minus opponent goals.
       enum:
         - elo
         - winrate
@@ -469,6 +490,11 @@ components:
           $ref: "#/components/schemas/RatingSystem"
     RatingSystem:
       type: string
+      description: |
+        Rating algorithm used by an era:
+
+        - `elo`: the legacy Elo rating system; rating deviation is `null`.
+        - `glicko2`: Glicko-2 ratings with rating deviation in `rd`.
       enum:
         - elo
         - glicko2
@@ -868,13 +894,26 @@ components:
           type: integer
     MatchType:
       type: string
+      description: |
+        Queue in which the match was played:
+
+        - `competitive`: ranked competitive queue.
+        - `quick_play`: unranked quick-play queue.
+        - `lobby`: custom lobby.
       enum:
         - competitive
         - quick_play
         - lobby
     MatchOutcome:
       type: string
-      description: Match outcome values observed in live responses.
+      description: |
+        Match result:
+
+        - `finished`: completed normally.
+        - `forfeited`: ended by a forfeit.
+        - `draw_by_vote`: players voted to end the match as a draw.
+        - `draw`: recorded as a draw.
+        - `cancelled`: cancelled without a result.
       enum:
         - finished
         - forfeited
@@ -883,7 +922,15 @@ components:
         - cancelled
     GameMode:
       type: string
-      description: Different types of gamemodes, always draftout for competitive/quick-play
+      description: |
+        Board rules used by the match:
+
+        - `draftout`: players draft the goals on the shared board.
+        - `lockout`: players race on a randomly generated shared board.
+        - `blackout`: players cooperate on one shared board.
+
+        Competitive and quick-play matches use `draftout`; lobby matches may
+        use any of the three modes.
       enum:
         - draftout
         - lockout

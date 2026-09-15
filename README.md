@@ -2,7 +2,7 @@
 
 Community-maintained OpenAPI documentation for the public Draftout API at `https://draftoutmc.com`.
 
-This is not an official Draftout project. The spec is based on observed API responses.
+This is not an official Draftout project. The spec is based on observed API responses and covers the leaderboard, rating eras, player stats, match details, rating history, and rank bands.
 
 ## Docs
 

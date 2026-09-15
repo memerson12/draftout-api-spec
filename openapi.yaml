@@ -1,31 +1,106 @@
 openapi: 3.1.0
 info:
   title: Draftout Community API
-  version: 0.1.0
+  version: 0.2.0
   description: |
     Community-maintained OpenAPI description for the public Draftout stats
     endpoints observed at draftoutmc.com.
 
     This is not an official Draftout API specification. It was inferred from
-    live responses on 2026-06-07 and may be incomplete.
+    live responses on 2026-09-14 and may be incomplete.
 servers:
   - url: https://draftoutmc.com
     description: Draftout production server
 tags:
   - name: Stats
-    description: Player stats, match details, and Elo history.
+    description: Leaderboards, player stats, match details, and rating history.
   - name: Ranks
-    description: Elo rank bands.
+    description: Rating rank bands.
 paths:
+  /api/stats:
+    get:
+      tags:
+        - Stats
+      summary: Get the player leaderboard
+      description: |
+        Returns competitive player statistics ordered by the selected metric.
+        Results can be limited, filtered by a case-insensitive username query,
+        and scoped to a rating era.
+      operationId: getStatsLeaderboard
+      parameters:
+        - name: metric
+          in: query
+          description: Statistic used to order the results. Defaults to `elo`.
+          required: false
+          schema:
+            $ref: "#/components/schemas/LeaderboardMetric"
+            default: elo
+        - name: q
+          in: query
+          description: Case-insensitive username search query.
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of rows to return. Defaults to `100`.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 100
+        - $ref: "#/components/parameters/Era"
+      responses:
+        "200":
+          description: Ranked player statistics.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+              examples:
+                elo:
+                  summary: Elo leaderboard
+                  value:
+                    rows:
+                      - uuid: 92b63a39-b36a-445f-a94c-77ae212dcea3
+                        username: bing_pigs
+                        elo: 1566
+                        rd: 102.36122699299446
+                        eraId: 2
+                        rankName: Evoker III
+                        rankColor: "#D7D284"
+                        matches: 16
+                        completedMatches: 12
+                        wins: 14
+                        losses: 2
+                        draws: 0
+                        winRate: 0.875
+                        averageFinishTime: 1436573.1
+                        averageGoals: 4.333333333333333
+                        ranked: true
+                        metricValue: 1566
+                        rank: 2
+                    metric: elo
+                    query: ""
+                    limit: 100
+                    eraId: 2
+                    eras:
+                      - id: 1
+                        firstMatchId: 0
+                        season: null
+                        system: elo
+                      - id: 2
+                        firstMatchId: 514840
+                        season: null
+                        system: glicko2
   /api/ranks:
     get:
       tags:
         - Ranks
-      summary: Get Elo rank bands
+      summary: Get rating rank bands
       description: |
-        Returns the configured Draftout Elo rank bands in ascending Elo order.
-        The lowest and highest bands are open-ended and use `null` for the
-        missing bound.
+        Returns the configured Draftout rating rank bands in ascending order.
+        The highest band is open-ended and uses `null` for its maximum.
       operationId: getRanks
       responses:
         "200":
@@ -40,18 +115,18 @@ paths:
                 ranks:
                   summary: Rank bands
                   value:
-                    - name: Coal
-                      min: null
-                      max: 499
-                      color: "#424646"
+                    - name: Silverfish I
+                      min: 0
+                      max: 99
+                      color: "#ACB1B4"
                     - name: Guardian I
-                      min: 1700
-                      max: 1799
-                      color: "#45686e"
+                      min: 1800
+                      max: 1899
+                      color: "#36775F"
                     - name: Warden
                       min: 2000
                       max: null
-                      color: "#2b4450"
+                      color: "#1CCEDA"
   /api/stats/{username}:
     get:
       tags:
@@ -79,6 +154,7 @@ paths:
           schema:
             $ref: "#/components/schemas/MatchFilter"
             default: competitive
+        - $ref: "#/components/parameters/Era"
       responses:
         "200":
           description: Player stats page.
@@ -91,45 +167,69 @@ paths:
                   summary: Competitive stats
                   value:
                     player:
-                      uuid: 9a8e24df-4c85-49d6-96a6-951da84fa5c4
-                      username: Feinberg
-                      elo: 1705
+                      uuid: 92b63a39-b36a-445f-a94c-77ae212dcea3
+                      username: bing_pigs
+                      elo: 1566
+                      rd: 102.36122699299446
                       ranked: true
-                      rank: 1
-                      rankName: Guardian I
-                      rankColor: "#45686e"
+                      rank: 2
+                      rankName: Evoker III
+                      rankColor: "#D7D284"
+                      eraId: 2
                     record:
-                      matches: 43
-                      completedMatches: 39
-                      wins: 40
+                      matches: 16
+                      completedMatches: 12
+                      wins: 14
                       losses: 2
-                      draws: 1
-                      winRate: 0.9523809523809523
-                      averageFinishTime: 1487023.7837837837
-                      averageGoals: 6.230769230769231
+                      draws: 0
+                      winRate: 0.875
+                      averageFinishTime: 1436573.1
+                      averageGoals: 4.333333333333333
                     aggregate:
-                      peakElo: 1705
-                      bestStreak: 18
-                      fastestWinMs: 693452
+                      peakElo: 1566
+                      bestStreak: 12
+                      fastestWinMs: 861628
                       forfeitCount: 0
                     matches:
-                      - id: 20010
+                      - id: 516492
                         matchType: competitive
                         gameMode: draftout
-                        outcome: finished
-                        completedAt: 1779754939814
-                        durationMs: 2316432
+                        worldSeedMode: random
+                        boardMode: random
+                        usedCommands: false
+                        outcome: forfeited
+                        completedAt: 1789426891172
+                        durationMs: 63264
                         participants:
-                          - uuid: 9a8e24df-4c85-49d6-96a6-951da84fa5c4
-                            username: Feinberg
+                          - uuid: 5351a58a-3888-41a5-b128-7c090deba90e
+                            username: Picklefish23350
+                            won: false
+                            score: 0
+                            eloBefore: 1442
+                            eloChange: -25
+                            eloAfter: 1417
+                            rd: 108.09685979882966
+                          - uuid: 92b63a39-b36a-445f-a94c-77ae212dcea3
+                            username: bing_pigs
                             won: true
-                            score: 13
-                            eloBefore: 1692
-                            eloChange: 13
-                            eloAfter: 1705
+                            score: 4
+                            eloBefore: 1545
+                            eloChange: 21
+                            eloAfter: 1566
+                            rd: 102.36122699299446
                     page: 1
-                    totalPages: 3
+                    totalPages: 1
                     filter: competitive
+                    eraId: 2
+                    eras:
+                      - id: 1
+                        firstMatchId: 0
+                        season: null
+                        system: elo
+                      - id: 2
+                        firstMatchId: 514840
+                        season: null
+                        system: glicko2
   /api/stats/{username}/{matchId}:
     get:
       tags:
@@ -167,6 +267,7 @@ paths:
       operationId: getPlayerEloSeries
       parameters:
         - $ref: "#/components/parameters/Username"
+        - $ref: "#/components/parameters/Era"
       responses:
         "200":
           description: Elo series.
@@ -184,6 +285,17 @@ components:
       schema:
         type: string
         example: Feinberg
+    Era:
+      name: era
+      in: query
+      description: |
+        Positive rating-era ID. When omitted, the latest era is used. Available
+        eras are returned in leaderboard and player-stat responses.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        example: 2
   schemas:
     MatchFilter:
       type: string
@@ -203,11 +315,9 @@ components:
           type: string
           example: Guardian I
         min:
-          type:
-            - integer
-            - "null"
+          type: integer
           minimum: 0
-          description: Minimum Elo for the band. `null` means no lower bound.
+          description: Inclusive minimum rating for the band.
         max:
           type:
             - integer
@@ -218,6 +328,150 @@ components:
           type: string
           pattern: "^#[0-9A-Fa-f]{6}$"
           example: "#45686e"
+    LeaderboardResponse:
+      type: object
+      required:
+        - rows
+        - metric
+        - query
+        - limit
+        - eraId
+        - eras
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardRow"
+        metric:
+          $ref: "#/components/schemas/LeaderboardMetric"
+        query:
+          type: string
+          description: Normalized username query, or an empty string when omitted.
+        limit:
+          type: integer
+          minimum: 1
+        eraId:
+          type: integer
+          minimum: 1
+        eras:
+          type: array
+          items:
+            $ref: "#/components/schemas/Era"
+    LeaderboardRow:
+      type: object
+      required:
+        - uuid
+        - username
+        - elo
+        - rd
+        - eraId
+        - rankName
+        - rankColor
+        - matches
+        - completedMatches
+        - wins
+        - losses
+        - draws
+        - winRate
+        - averageFinishTime
+        - averageGoals
+        - ranked
+        - metricValue
+        - rank
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        username:
+          type: string
+        elo:
+          type: integer
+        rd:
+          type:
+            - number
+            - "null"
+          description: Rating deviation. `null` for eras that use Elo ratings.
+        eraId:
+          type: integer
+          minimum: 1
+        rankName:
+          type: string
+        rankColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        matches:
+          type: integer
+          minimum: 0
+        completedMatches:
+          type: integer
+          minimum: 0
+        wins:
+          type: integer
+          minimum: 0
+        losses:
+          type: integer
+          minimum: 0
+        draws:
+          type: integer
+          minimum: 0
+        winRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        averageFinishTime:
+          type:
+            - number
+            - "null"
+          description: Average finish time in milliseconds.
+        averageGoals:
+          type:
+            - number
+            - "null"
+          description: Average goal differential for completed matches.
+        ranked:
+          type: boolean
+        metricValue:
+          type: number
+          description: Value of the selected leaderboard metric.
+        rank:
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          description: Position in the full metric leaderboard; may be `null` for a searched subset.
+    LeaderboardMetric:
+      type: string
+      enum:
+        - elo
+        - winrate
+        - diff
+    Era:
+      type: object
+      required:
+        - id
+        - firstMatchId
+        - season
+        - system
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        firstMatchId:
+          type: integer
+          minimum: 0
+          description: First match ID included in the era.
+        season:
+          type:
+            - integer
+            - "null"
+          minimum: 1
+        system:
+          $ref: "#/components/schemas/RatingSystem"
+    RatingSystem:
+      type: string
+      enum:
+        - elo
+        - glicko2
     PlayerStatsResponse:
       type: object
       required:
@@ -228,6 +482,8 @@ components:
         - page
         - totalPages
         - filter
+        - eraId
+        - eras
       properties:
         player:
           anyOf:
@@ -249,6 +505,13 @@ components:
           minimum: 1
         filter:
           $ref: "#/components/schemas/MatchFilter"
+        eraId:
+          type: integer
+          minimum: 1
+        eras:
+          type: array
+          items:
+            $ref: "#/components/schemas/Era"
     MatchDetailResponse:
       type: object
       required:
@@ -268,6 +531,7 @@ components:
       required:
         - startElo
         - points
+        - eraId
       properties:
         startElo:
           type: integer
@@ -276,16 +540,21 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/EloPoint"
+        eraId:
+          type: integer
+          minimum: 1
     Player:
       type: object
       required:
         - uuid
         - username
         - elo
+        - rd
         - ranked
         - rank
         - rankName
         - rankColor
+        - eraId
       properties:
         uuid:
           type: string
@@ -294,6 +563,11 @@ components:
           type: string
         elo:
           type: integer
+        rd:
+          type:
+            - number
+            - "null"
+          description: Rating deviation. `null` for eras that use Elo ratings.
         ranked:
           type: boolean
         rank:
@@ -309,6 +583,9 @@ components:
           type: string
           pattern: "^#[0-9A-Fa-f]{6}$"
           example: "#45686e"
+        eraId:
+          type: integer
+          minimum: 1
     Record:
       type: object
       required:
@@ -339,6 +616,7 @@ components:
         winRate:
           type: number
           minimum: 0
+          maximum: 1
         averageFinishTime:
           type:
             - number
@@ -348,6 +626,7 @@ components:
           type:
             - number
             - "null"
+          description: Average goal differential for completed matches.
     Aggregate:
       type: object
       required:
@@ -377,6 +656,9 @@ components:
         - id
         - matchType
         - gameMode
+        - worldSeedMode
+        - boardMode
+        - usedCommands
         - outcome
         - completedAt
         - durationMs
@@ -388,6 +670,17 @@ components:
           $ref: "#/components/schemas/MatchType"
         gameMode:
           $ref: "#/components/schemas/GameMode"
+        worldSeedMode:
+          type: string
+          description: World-seed selection mode. Observed as `random`.
+          example: random
+        boardMode:
+          type: string
+          description: Board selection mode. Observed as `random`.
+          example: random
+        usedCommands:
+          type: boolean
+          description: Whether commands were used during the match.
         outcome:
           $ref: "#/components/schemas/MatchOutcome"
         completedAt:
@@ -429,6 +722,7 @@ components:
         - eloBefore
         - eloChange
         - eloAfter
+        - rd
       properties:
         uuid:
           type: string
@@ -441,11 +735,22 @@ components:
           type: integer
           minimum: 0
         eloBefore:
-          type: integer
+          type:
+            - integer
+            - "null"
         eloChange:
-          type: integer
+          type:
+            - integer
+            - "null"
         eloAfter:
-          type: integer
+          type:
+            - integer
+            - "null"
+        rd:
+          type:
+            - number
+            - "null"
+          description: Rating deviation after the match. `null` for unranked participants or Elo eras.
     Goal:
       type: object
       required:
@@ -501,6 +806,7 @@ components:
         - data
         - picked
         - timedOut
+        - rerolled
       properties:
         id:
           type: string
@@ -512,6 +818,9 @@ components:
           type: boolean
         timedOut:
           type: boolean
+        rerolled:
+          type: boolean
+          description: Whether this goal was replaced during the draft.
     EloPoint:
       type: object
       required:
@@ -570,6 +879,8 @@ components:
         - finished
         - forfeited
         - draw_by_vote
+        - draw
+        - cancelled
     GameMode:
       type: string
       description: Different types of gamemodes, always draftout for competitive/quick-play

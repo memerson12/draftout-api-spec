@@ -1,6 +1,6 @@
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="draftout-community-api">Draftout Community API v0.1.0</h1>
+<h1 id="draftout-community-api">Draftout Community API v0.2.0</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
@@ -8,7 +8,7 @@ Community-maintained OpenAPI description for the public Draftout stats
 endpoints observed at draftoutmc.com.
 
 This is not an official Draftout API specification. It was inferred from
-live responses on 2026-06-07 and may be incomplete.
+live responses on 2026-09-14 and may be incomplete.
 
 Base URLs:
 
@@ -16,7 +16,109 @@ Base URLs:
 
 <h1 id="draftout-community-api-stats">Stats</h1>
 
-Player stats, match details, and Elo history.
+Leaderboards, player stats, match details, and rating history.
+
+## getStatsLeaderboard
+
+<a id="opIdgetStatsLeaderboard"></a>
+
+> Code samples
+
+```shell
+# You can also use wget
+curl -X GET https://draftoutmc.com/api/stats \
+  -H 'Accept: application/json'
+
+```
+
+`GET /api/stats`
+
+*Get the player leaderboard*
+
+Returns competitive player statistics ordered by the selected metric.
+Results can be limited, filtered by a case-insensitive username query,
+and scoped to a rating era.
+
+<h3 id="getstatsleaderboard-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|metric|query|[LeaderboardMetric](#schemaleaderboardmetric)|false|Statistic used to order the results. Defaults to `elo`.|
+|q|query|string|false|Case-insensitive username search query.|
+|limit|query|integer|false|Maximum number of rows to return. Defaults to `100`.|
+|era|query|integer|false|Positive rating-era ID. When omitted, the latest era is used. Available|
+
+#### Detailed descriptions
+
+**era**: Positive rating-era ID. When omitted, the latest era is used. Available
+eras are returned in leaderboard and player-stat responses.
+
+#### Enumerated Values
+
+|Parameter|Value|
+|---|---|
+|metric|elo|
+|metric|winrate|
+|metric|diff|
+
+> Example responses
+
+> Ranked player statistics.
+
+```json
+{
+  "rows": [
+    {
+      "uuid": "92b63a39-b36a-445f-a94c-77ae212dcea3",
+      "username": "bing_pigs",
+      "elo": 1566,
+      "rd": 102.36122699299446,
+      "eraId": 2,
+      "rankName": "Evoker III",
+      "rankColor": "#D7D284",
+      "matches": 16,
+      "completedMatches": 12,
+      "wins": 14,
+      "losses": 2,
+      "draws": 0,
+      "winRate": 0.875,
+      "averageFinishTime": 1436573.1,
+      "averageGoals": 4.333333333333333,
+      "ranked": true,
+      "metricValue": 1566,
+      "rank": 2
+    }
+  ],
+  "metric": "elo",
+  "query": "",
+  "limit": 100,
+  "eraId": 2,
+  "eras": [
+    {
+      "id": 1,
+      "firstMatchId": 0,
+      "season": null,
+      "system": "elo"
+    },
+    {
+      "id": 2,
+      "firstMatchId": 514840,
+      "season": null,
+      "system": "glicko2"
+    }
+  ]
+}
+```
+
+<h3 id="getstatsleaderboard-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Ranked player statistics.|[LeaderboardResponse](#schemaleaderboardresponse)|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
 
 ## getPlayerStats
 
@@ -46,6 +148,12 @@ the endpoint still returns HTTP 200 with `player: null` and empty stats.
 |username|path|string|true|Minecraft username.|
 |page|query|integer|false|One-based page number. Defaults to `1`.|
 |filter|query|[MatchFilter](#schemamatchfilter)|false|Match queue filter. Defaults to `competitive`.|
+|era|query|integer|false|Positive rating-era ID. When omitted, the latest era is used. Available|
+
+#### Detailed descriptions
+
+**era**: Positive rating-era ID. When omitted, the latest era is used. Available
+eras are returned in leaderboard and player-stat responses.
 
 #### Enumerated Values
 
@@ -62,54 +170,85 @@ the endpoint still returns HTTP 200 with `player: null` and empty stats.
 ```json
 {
   "player": {
-    "uuid": "9a8e24df-4c85-49d6-96a6-951da84fa5c4",
-    "username": "Feinberg",
-    "elo": 1705,
+    "uuid": "92b63a39-b36a-445f-a94c-77ae212dcea3",
+    "username": "bing_pigs",
+    "elo": 1566,
+    "rd": 102.36122699299446,
     "ranked": true,
-    "rank": 1,
-    "rankName": "Guardian I",
-    "rankColor": "#45686e"
+    "rank": 2,
+    "rankName": "Evoker III",
+    "rankColor": "#D7D284",
+    "eraId": 2
   },
   "record": {
-    "matches": 43,
-    "completedMatches": 39,
-    "wins": 40,
+    "matches": 16,
+    "completedMatches": 12,
+    "wins": 14,
     "losses": 2,
-    "draws": 1,
-    "winRate": 0.9523809523809523,
-    "averageFinishTime": 1487023.7837837837,
-    "averageGoals": 6.230769230769231
+    "draws": 0,
+    "winRate": 0.875,
+    "averageFinishTime": 1436573.1,
+    "averageGoals": 4.333333333333333
   },
   "aggregate": {
-    "peakElo": 1705,
-    "bestStreak": 18,
-    "fastestWinMs": 693452,
+    "peakElo": 1566,
+    "bestStreak": 12,
+    "fastestWinMs": 861628,
     "forfeitCount": 0
   },
   "matches": [
     {
-      "id": 20010,
+      "id": 516492,
       "matchType": "competitive",
       "gameMode": "draftout",
-      "outcome": "finished",
-      "completedAt": 1779754939814,
-      "durationMs": 2316432,
+      "worldSeedMode": "random",
+      "boardMode": "random",
+      "usedCommands": false,
+      "outcome": "forfeited",
+      "completedAt": 1789426891172,
+      "durationMs": 63264,
       "participants": [
         {
-          "uuid": "9a8e24df-4c85-49d6-96a6-951da84fa5c4",
-          "username": "Feinberg",
+          "uuid": "5351a58a-3888-41a5-b128-7c090deba90e",
+          "username": "Picklefish23350",
+          "won": false,
+          "score": 0,
+          "eloBefore": 1442,
+          "eloChange": -25,
+          "eloAfter": 1417,
+          "rd": 108.09685979882966
+        },
+        {
+          "uuid": "92b63a39-b36a-445f-a94c-77ae212dcea3",
+          "username": "bing_pigs",
           "won": true,
-          "score": 13,
-          "eloBefore": 1692,
-          "eloChange": 13,
-          "eloAfter": 1705
+          "score": 4,
+          "eloBefore": 1545,
+          "eloChange": 21,
+          "eloAfter": 1566,
+          "rd": 102.36122699299446
         }
       ]
     }
   ],
   "page": 1,
-  "totalPages": 3,
-  "filter": "competitive"
+  "totalPages": 1,
+  "filter": "competitive",
+  "eraId": 2,
+  "eras": [
+    {
+      "id": 1,
+      "firstMatchId": 0,
+      "season": null,
+      "system": "elo"
+    },
+    {
+      "id": 2,
+      "firstMatchId": 514840,
+      "season": null,
+      "system": "glicko2"
+    }
+  ]
 }
 ```
 
@@ -161,15 +300,20 @@ with `match: null`.
     "uuid": "095be615-a8ad-4c33-8e9c-c7612fbf6c9f",
     "username": "string",
     "elo": 0,
+    "rd": 0,
     "ranked": true,
     "rank": 1,
     "rankName": "Guardian I",
-    "rankColor": "#45686e"
+    "rankColor": "#45686e",
+    "eraId": 1
   },
   "match": {
     "id": 0,
     "matchType": "competitive",
     "gameMode": "draftout",
+    "worldSeedMode": "random",
+    "boardMode": "random",
+    "usedCommands": true,
     "outcome": "finished",
     "completedAt": 0,
     "durationMs": 0,
@@ -181,7 +325,8 @@ with `match: null`.
         "score": 0,
         "eloBefore": 0,
         "eloChange": 0,
-        "eloAfter": 0
+        "eloAfter": 0,
+        "rd": 0
       }
     ],
     "seed": "string",
@@ -202,7 +347,8 @@ with `match: null`.
           "id": "string",
           "data": "string",
           "picked": true,
-          "timedOut": true
+          "timedOut": true,
+          "rerolled": true
         }
       ]
     }
@@ -245,6 +391,12 @@ used to build an Elo chart.
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |username|path|string|true|Minecraft username.|
+|era|query|integer|false|Positive rating-era ID. When omitted, the latest era is used. Available|
+
+#### Detailed descriptions
+
+**era**: Positive rating-era ID. When omitted, the latest era is used. Available
+eras are returned in leaderboard and player-stat responses.
 
 > Example responses
 
@@ -268,7 +420,8 @@ used to build an Elo chart.
       "opponentScore": 0,
       "durationMs": 0
     }
-  ]
+  ],
+  "eraId": 1
 }
 ```
 
@@ -284,7 +437,7 @@ This operation does not require authentication
 
 <h1 id="draftout-community-api-ranks">Ranks</h1>
 
-Elo rank bands.
+Rating rank bands.
 
 ## getRanks
 
@@ -301,11 +454,10 @@ curl -X GET https://draftoutmc.com/api/ranks \
 
 `GET /api/ranks`
 
-*Get Elo rank bands*
+*Get rating rank bands*
 
-Returns the configured Draftout Elo rank bands in ascending Elo order.
-The lowest and highest bands are open-ended and use `null` for the
-missing bound.
+Returns the configured Draftout rating rank bands in ascending order.
+The highest band is open-ended and uses `null` for its maximum.
 
 > Example responses
 
@@ -314,22 +466,22 @@ missing bound.
 ```json
 [
   {
-    "name": "Coal",
-    "min": null,
-    "max": 499,
-    "color": "#424646"
+    "name": "Silverfish I",
+    "min": 0,
+    "max": 99,
+    "color": "#ACB1B4"
   },
   {
     "name": "Guardian I",
-    "min": 1700,
-    "max": 1799,
-    "color": "#45686e"
+    "min": 1800,
+    "max": 1899,
+    "color": "#36775F"
   },
   {
     "name": "Warden",
     "min": 2000,
     "max": null,
-    "color": "#2b4450"
+    "color": "#1CCEDA"
   }
 ]
 ```
@@ -348,7 +500,7 @@ Status Code **200**
 |---|---|---|---|---|
 |*anonymous*|[[Rank](#schemarank)]|false|none|none|
 |» name|string|true|none|none|
-|» min|integer,null|true|none|Minimum Elo for the band. `null` means no lower bound.|
+|» min|integer|true|none|Inclusive minimum rating for the band.|
 |» max|integer,null|true|none|Maximum Elo for the band. `null` means no upper bound.|
 |» color|string|true|none|none|
 
@@ -406,9 +558,198 @@ This operation does not require authentication
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |name|string|true|none|none|
-|min|integer,null|true|none|Minimum Elo for the band. `null` means no lower bound.|
+|min|integer|true|none|Inclusive minimum rating for the band.|
 |max|integer,null|true|none|Maximum Elo for the band. `null` means no upper bound.|
 |color|string|true|none|none|
+
+<h2 id="tocS_LeaderboardResponse">LeaderboardResponse</h2>
+<!-- backwards compatibility -->
+<a id="schemaleaderboardresponse"></a>
+<a id="schema_LeaderboardResponse"></a>
+<a id="tocSleaderboardresponse"></a>
+<a id="tocsleaderboardresponse"></a>
+
+```json
+{
+  "rows": [
+    {
+      "uuid": "095be615-a8ad-4c33-8e9c-c7612fbf6c9f",
+      "username": "string",
+      "elo": 0,
+      "rd": 0,
+      "eraId": 1,
+      "rankName": "string",
+      "rankColor": "string",
+      "matches": 0,
+      "completedMatches": 0,
+      "wins": 0,
+      "losses": 0,
+      "draws": 0,
+      "winRate": 1,
+      "averageFinishTime": 0,
+      "averageGoals": 0,
+      "ranked": true,
+      "metricValue": 0,
+      "rank": 1
+    }
+  ],
+  "metric": "elo",
+  "query": "string",
+  "limit": 1,
+  "eraId": 1,
+  "eras": [
+    {
+      "id": 1,
+      "firstMatchId": 0,
+      "season": 1,
+      "system": "elo"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|rows|[[LeaderboardRow](#schemaleaderboardrow)]|true|none|none|
+|metric|[LeaderboardMetric](#schemaleaderboardmetric)|true|none|none|
+|query|string|true|none|Normalized username query, or an empty string when omitted.|
+|limit|integer|true|none|none|
+|eraId|integer|true|none|none|
+|eras|[[Era](#schemaera)]|true|none|none|
+
+<h2 id="tocS_LeaderboardRow">LeaderboardRow</h2>
+<!-- backwards compatibility -->
+<a id="schemaleaderboardrow"></a>
+<a id="schema_LeaderboardRow"></a>
+<a id="tocSleaderboardrow"></a>
+<a id="tocsleaderboardrow"></a>
+
+```json
+{
+  "uuid": "095be615-a8ad-4c33-8e9c-c7612fbf6c9f",
+  "username": "string",
+  "elo": 0,
+  "rd": 0,
+  "eraId": 1,
+  "rankName": "string",
+  "rankColor": "string",
+  "matches": 0,
+  "completedMatches": 0,
+  "wins": 0,
+  "losses": 0,
+  "draws": 0,
+  "winRate": 1,
+  "averageFinishTime": 0,
+  "averageGoals": 0,
+  "ranked": true,
+  "metricValue": 0,
+  "rank": 1
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|uuid|string(uuid)|true|none|none|
+|username|string|true|none|none|
+|elo|integer|true|none|none|
+|rd|number,null|true|none|Rating deviation. `null` for eras that use Elo ratings.|
+|eraId|integer|true|none|none|
+|rankName|string|true|none|none|
+|rankColor|string|true|none|none|
+|matches|integer|true|none|none|
+|completedMatches|integer|true|none|none|
+|wins|integer|true|none|none|
+|losses|integer|true|none|none|
+|draws|integer|true|none|none|
+|winRate|number|true|none|none|
+|averageFinishTime|number,null|true|none|Average finish time in milliseconds.|
+|averageGoals|number,null|true|none|Average goal differential for completed matches.|
+|ranked|boolean|true|none|none|
+|metricValue|number|true|none|Value of the selected leaderboard metric.|
+|rank|integer,null|true|none|Position in the full metric leaderboard; may be `null` for a searched subset.|
+
+<h2 id="tocS_LeaderboardMetric">LeaderboardMetric</h2>
+<!-- backwards compatibility -->
+<a id="schemaleaderboardmetric"></a>
+<a id="schema_LeaderboardMetric"></a>
+<a id="tocSleaderboardmetric"></a>
+<a id="tocsleaderboardmetric"></a>
+
+```json
+"elo"
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|*anonymous*|elo|
+|*anonymous*|winrate|
+|*anonymous*|diff|
+
+<h2 id="tocS_Era">Era</h2>
+<!-- backwards compatibility -->
+<a id="schemaera"></a>
+<a id="schema_Era"></a>
+<a id="tocSera"></a>
+<a id="tocsera"></a>
+
+```json
+{
+  "id": 1,
+  "firstMatchId": 0,
+  "season": 1,
+  "system": "elo"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|id|integer|true|none|none|
+|firstMatchId|integer|true|none|First match ID included in the era.|
+|season|integer,null|true|none|none|
+|system|[RatingSystem](#schemaratingsystem)|true|none|none|
+
+<h2 id="tocS_RatingSystem">RatingSystem</h2>
+<!-- backwards compatibility -->
+<a id="schemaratingsystem"></a>
+<a id="schema_RatingSystem"></a>
+<a id="tocSratingsystem"></a>
+<a id="tocsratingsystem"></a>
+
+```json
+"elo"
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|*anonymous*|elo|
+|*anonymous*|glicko2|
 
 <h2 id="tocS_PlayerStatsResponse">PlayerStatsResponse</h2>
 <!-- backwards compatibility -->
@@ -423,10 +764,12 @@ This operation does not require authentication
     "uuid": "095be615-a8ad-4c33-8e9c-c7612fbf6c9f",
     "username": "string",
     "elo": 0,
+    "rd": 0,
     "ranked": true,
     "rank": 1,
     "rankName": "Guardian I",
-    "rankColor": "#45686e"
+    "rankColor": "#45686e",
+    "eraId": 1
   },
   "record": {
     "matches": 0,
@@ -434,7 +777,7 @@ This operation does not require authentication
     "wins": 0,
     "losses": 0,
     "draws": 0,
-    "winRate": 0,
+    "winRate": 1,
     "averageFinishTime": 0,
     "averageGoals": 0
   },
@@ -449,6 +792,9 @@ This operation does not require authentication
       "id": 0,
       "matchType": "competitive",
       "gameMode": "draftout",
+      "worldSeedMode": "random",
+      "boardMode": "random",
+      "usedCommands": true,
       "outcome": "finished",
       "completedAt": 0,
       "durationMs": 0,
@@ -460,14 +806,24 @@ This operation does not require authentication
           "score": 0,
           "eloBefore": 0,
           "eloChange": 0,
-          "eloAfter": 0
+          "eloAfter": 0,
+          "rd": 0
         }
       ]
     }
   ],
   "page": 1,
   "totalPages": 1,
-  "filter": "competitive"
+  "filter": "competitive",
+  "eraId": 1,
+  "eras": [
+    {
+      "id": 1,
+      "firstMatchId": 0,
+      "season": 1,
+      "system": "elo"
+    }
+  ]
 }
 
 ```
@@ -500,6 +856,8 @@ continued
 |page|integer|true|none|none|
 |totalPages|integer|true|none|none|
 |filter|[MatchFilter](#schemamatchfilter)|true|none|none|
+|eraId|integer|true|none|none|
+|eras|[[Era](#schemaera)]|true|none|none|
 
 <h2 id="tocS_MatchDetailResponse">MatchDetailResponse</h2>
 <!-- backwards compatibility -->
@@ -514,15 +872,20 @@ continued
     "uuid": "095be615-a8ad-4c33-8e9c-c7612fbf6c9f",
     "username": "string",
     "elo": 0,
+    "rd": 0,
     "ranked": true,
     "rank": 1,
     "rankName": "Guardian I",
-    "rankColor": "#45686e"
+    "rankColor": "#45686e",
+    "eraId": 1
   },
   "match": {
     "id": 0,
     "matchType": "competitive",
     "gameMode": "draftout",
+    "worldSeedMode": "random",
+    "boardMode": "random",
+    "usedCommands": true,
     "outcome": "finished",
     "completedAt": 0,
     "durationMs": 0,
@@ -534,7 +897,8 @@ continued
         "score": 0,
         "eloBefore": 0,
         "eloChange": 0,
-        "eloAfter": 0
+        "eloAfter": 0,
+        "rd": 0
       }
     ],
     "seed": "string",
@@ -555,7 +919,8 @@ continued
           "id": "string",
           "data": "string",
           "picked": true,
-          "timedOut": true
+          "timedOut": true,
+          "rerolled": true
         }
       ]
     }
@@ -625,7 +990,8 @@ or
       "opponentScore": 0,
       "durationMs": 0
     }
-  ]
+  ],
+  "eraId": 1
 }
 
 ```
@@ -636,6 +1002,7 @@ or
 |---|---|---|---|---|
 |startElo|integer|true|none|none|
 |points|[[EloPoint](#schemaelopoint)]|true|none|none|
+|eraId|integer|true|none|none|
 
 <h2 id="tocS_Player">Player</h2>
 <!-- backwards compatibility -->
@@ -649,10 +1016,12 @@ or
   "uuid": "095be615-a8ad-4c33-8e9c-c7612fbf6c9f",
   "username": "string",
   "elo": 0,
+  "rd": 0,
   "ranked": true,
   "rank": 1,
   "rankName": "Guardian I",
-  "rankColor": "#45686e"
+  "rankColor": "#45686e",
+  "eraId": 1
 }
 
 ```
@@ -664,10 +1033,12 @@ or
 |uuid|string(uuid)|true|none|none|
 |username|string|true|none|none|
 |elo|integer|true|none|none|
+|rd|number,null|true|none|Rating deviation. `null` for eras that use Elo ratings.|
 |ranked|boolean|true|none|none|
 |rank|integer,null|true|none|Leaderboard rank. Observed as `null` for quick-play responses.|
 |rankName|string|true|none|none|
 |rankColor|string|true|none|none|
+|eraId|integer|true|none|none|
 
 <h2 id="tocS_Record">Record</h2>
 <!-- backwards compatibility -->
@@ -683,7 +1054,7 @@ or
   "wins": 0,
   "losses": 0,
   "draws": 0,
-  "winRate": 0,
+  "winRate": 1,
   "averageFinishTime": 0,
   "averageGoals": 0
 }
@@ -701,7 +1072,7 @@ or
 |draws|integer|true|none|none|
 |winRate|number|true|none|none|
 |averageFinishTime|number,null|true|none|Average finish time in milliseconds.|
-|averageGoals|number,null|true|none|none|
+|averageGoals|number,null|true|none|Average goal differential for completed matches.|
 
 <h2 id="tocS_Aggregate">Aggregate</h2>
 <!-- backwards compatibility -->
@@ -741,6 +1112,9 @@ or
   "id": 0,
   "matchType": "competitive",
   "gameMode": "draftout",
+  "worldSeedMode": "random",
+  "boardMode": "random",
+  "usedCommands": true,
   "outcome": "finished",
   "completedAt": 0,
   "durationMs": 0,
@@ -752,7 +1126,8 @@ or
       "score": 0,
       "eloBefore": 0,
       "eloChange": 0,
-      "eloAfter": 0
+      "eloAfter": 0,
+      "rd": 0
     }
   ]
 }
@@ -766,6 +1141,9 @@ or
 |id|integer|true|none|none|
 |matchType|[MatchType](#schemamatchtype)|true|none|none|
 |gameMode|[GameMode](#schemagamemode)|true|none|Different types of gamemodes, always draftout for competitive/quick-play|
+|worldSeedMode|string|true|none|World-seed selection mode. Observed as `random`.|
+|boardMode|string|true|none|Board selection mode. Observed as `random`.|
+|usedCommands|boolean|true|none|Whether commands were used during the match.|
 |outcome|[MatchOutcome](#schemamatchoutcome)|true|none|Match outcome values observed in live responses.|
 |completedAt|integer(int64)|true|none|Unix timestamp in milliseconds.|
 |durationMs|integer|true|none|Match duration in milliseconds.|
@@ -783,6 +1161,9 @@ or
   "id": 0,
   "matchType": "competitive",
   "gameMode": "draftout",
+  "worldSeedMode": "random",
+  "boardMode": "random",
+  "usedCommands": true,
   "outcome": "finished",
   "completedAt": 0,
   "durationMs": 0,
@@ -794,7 +1175,8 @@ or
       "score": 0,
       "eloBefore": 0,
       "eloChange": 0,
-      "eloAfter": 0
+      "eloAfter": 0,
+      "rd": 0
     }
   ],
   "seed": "string",
@@ -815,7 +1197,8 @@ or
         "id": "string",
         "data": "string",
         "picked": true,
-        "timedOut": true
+        "timedOut": true,
+        "rerolled": true
       }
     ]
   }
@@ -855,7 +1238,8 @@ and
   "score": 0,
   "eloBefore": 0,
   "eloChange": 0,
-  "eloAfter": 0
+  "eloAfter": 0,
+  "rd": 0
 }
 
 ```
@@ -868,9 +1252,10 @@ and
 |username|string|true|none|none|
 |won|boolean|true|none|none|
 |score|integer|true|none|none|
-|eloBefore|integer|true|none|none|
-|eloChange|integer|true|none|none|
-|eloAfter|integer|true|none|none|
+|eloBefore|integer,null|true|none|none|
+|eloChange|integer,null|true|none|none|
+|eloAfter|integer,null|true|none|none|
+|rd|number,null|true|none|Rating deviation after the match. `null` for unranked participants or Elo eras.|
 
 <h2 id="tocS_Goal">Goal</h2>
 <!-- backwards compatibility -->
@@ -917,7 +1302,8 @@ and
       "id": "string",
       "data": "string",
       "picked": true,
-      "timedOut": true
+      "timedOut": true,
+      "rerolled": true
     }
   ]
 }
@@ -943,7 +1329,8 @@ and
   "id": "string",
   "data": "string",
   "picked": true,
-  "timedOut": true
+  "timedOut": true,
+  "rerolled": true
 }
 
 ```
@@ -956,6 +1343,7 @@ and
 |data|string,null|true|none|none|
 |picked|boolean|true|none|none|
 |timedOut|boolean|true|none|none|
+|rerolled|boolean|true|none|Whether this goal was replaced during the draft.|
 
 <h2 id="tocS_EloPoint">EloPoint</h2>
 <!-- backwards compatibility -->
@@ -1052,6 +1440,8 @@ Match outcome values observed in live responses.
 |*anonymous*|finished|
 |*anonymous*|forfeited|
 |*anonymous*|draw_by_vote|
+|*anonymous*|draw|
+|*anonymous*|cancelled|
 
 <h2 id="tocS_GameMode">GameMode</h2>
 <!-- backwards compatibility -->

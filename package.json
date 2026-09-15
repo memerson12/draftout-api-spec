@@ -1,8 +1,8 @@
 {
   "name": "draftout-api-spec",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Community-maintained OpenAPI and Markdown docs for the Draftout stats API.",
+  "description": "Community-maintained OpenAPI and Markdown docs for the Draftout stats and leaderboard API.",
   "type": "module",
   "scripts": {
     "docs:generate": "widdershins openapi.yaml -o docs/api.md --omitHeader --search false --language_tabs shell:Shell",
